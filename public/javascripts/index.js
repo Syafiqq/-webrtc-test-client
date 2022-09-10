@@ -140,12 +140,26 @@
 
     const sendMessage = (message) => {
         if (code) {
-            signaling.send(JSON.stringify({
-                ...message,
-                code,
-            }));
+            sssWaitForConnection(function () {
+                signaling.send(JSON.stringify({
+                    ...message,
+                    code,
+                }));
+            }, 250);
         }
     }
+
+    const sssWaitForConnection = function (callback, interval) {
+        if (signaling.readyState === 1) {
+            callback();
+        } else {
+            var that = this;
+            // optional: implement backoff for interval here
+            setTimeout(function () {
+                that.sssWaitForConnection(callback, interval);
+            }, interval);
+        }
+    };
     window.sendMessage = sendMessage
 
     const createAndSendOffer = async () => {
